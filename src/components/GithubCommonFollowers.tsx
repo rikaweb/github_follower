@@ -14,7 +14,7 @@ const GithubCommonFollowers = () => {
   const [errorText, setErrorText] = useState("");
 
   const [initLoad, setinitload] = useState(true);
- 
+  const [isLoading, setIsLoading] = useState(false);
   function fetchFollowersAPi(
     term: String,
     page = 1,
@@ -27,7 +27,7 @@ const GithubCommonFollowers = () => {
       .then((response) => {
         if (response.status === 404) {
           setErrorText(`Username ${term} not found`);
-        }  else if (!response.ok) {
+        } else if (!response.ok) {
           setErrorText(`There is issue on handeling request`);
         } else {
           return response.json();
@@ -54,7 +54,6 @@ const GithubCommonFollowers = () => {
     fetchFollowersAPi(username2, 1, [], setUsername2Followers);
   }
   useEffect(() => {
-  
     setCommonList(
       username1Followers?.filter((u1) =>
         username2Followers?.some((u2) => u1.login === u2.login)
@@ -65,16 +64,17 @@ const GithubCommonFollowers = () => {
   }, [username2Followers]);
   useEffect(() => {
     setErrorText(
-      commonList.length !== 0 ||initLoad
+      commonList.length !== 0 || initLoad
         ? ""
         : "There is no mutual follower between these users"
     );
-
+    setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [commonList]);
 
   async function handleSubmit(event: any) {
     event.preventDefault();
+    setIsLoading(true);
     setinitload(false);
     findCommonFollowers();
   }
@@ -116,12 +116,20 @@ const GithubCommonFollowers = () => {
                   </div>
 
                   <div>
-                    <button
+                    <>
+                    {isLoading? <button
+                      type="submit"
+                      className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                      Loading data, please wait
+                    </button>:<button
                       type="submit"
                       className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                       Search
-                    </button>
+                    </button>}
+                    </>
+                    
                   </div>
                 </form>
               </div>
