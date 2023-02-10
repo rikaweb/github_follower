@@ -27,8 +27,10 @@ const GithubCommonFollowers = () => {
       .then((response) => {
         if (response.status === 404) {
           setErrorText(`Username ${term} not found`);
+          setIsLoading(false);
         } else if (!response.ok) {
           setErrorText(`There is issue on handeling request`);
+          setIsLoading(false);
         } else {
           return response.json();
         }
