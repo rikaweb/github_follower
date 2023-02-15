@@ -12,6 +12,7 @@ const GithubCommonFollowers = () => {
   const [commonList, setCommonList] = useState<GithubUser[]>([]);
   const [pageNum, setPageNum] = useState(0);
   const [errorText, setErrorText] = useState("");
+  const [errorNum, setErrornum] = useState(0);
 
   const [initLoad, setinitload] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,12 +27,16 @@ const GithubCommonFollowers = () => {
     ) // Append the page number to the base URL
       .then((response) => {
         if (response.status === 404) {
+          setErrornum(404);
+          setCommonList([]);
           setErrorText(`Username ${term} not found`);
           setIsLoading(false);
         } else if (!response.ok) {
+          setErrornum(500);
           setErrorText(`There is issue on handeling request`);
           setIsLoading(false);
         } else {
+          setErrornum(0);
           return response.json();
         }
       })
@@ -65,11 +70,14 @@ const GithubCommonFollowers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username2Followers]);
   useEffect(() => {
-    setErrorText(
-      commonList.length !== 0 || initLoad
-        ? ""
-        : "There is no mutual follower between these users"
-    );
+    if (errorNum !== 404 && errorNum !== 500) {
+      setErrorText(
+        commonList.length !== 0 || initLoad
+          ? ""
+          : "There is no mutual follower between these users"
+      );
+    }
+
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [commonList]);
@@ -77,7 +85,9 @@ const GithubCommonFollowers = () => {
   async function handleSubmit(event: any) {
     event.preventDefault();
     setIsLoading(true);
+    setPageNum(0);
     setinitload(false);
+
     findCommonFollowers();
   }
 
@@ -119,19 +129,22 @@ const GithubCommonFollowers = () => {
 
                   <div>
                     <>
-                    {isLoading? <button
-                      type="submit"
-                      className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                      Loading data, please wait
-                    </button>:<button
-                      type="submit"
-                      className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                      Search
-                    </button>}
+                      {isLoading ? (
+                        <button
+                          type="submit"
+                          className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                          Loading data, please wait
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                          Search
+                        </button>
+                      )}
                     </>
-                    
                   </div>
                 </form>
               </div>
@@ -160,7 +173,7 @@ const GithubCommonFollowers = () => {
                         errorText === "" ? "text-gray-900" : "text-red-600"
                       } text-2xl`}
                     >
-                      {errorText}
+                      {isLoading ? "" : errorText}
                     </p>
                   </div>
                 </div>
